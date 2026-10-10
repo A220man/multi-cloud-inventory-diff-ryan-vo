@@ -1,0 +1,106 @@
+{
+  "realm": "cloud-inventory",
+  "enabled": true,
+  "registrationAllowed": false,
+  "resetPasswordAllowed": false,
+  "rememberMe": false,
+  "verifyEmail": false,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "sslRequired": "external",
+  "roles": {
+    "realm": [
+      {
+        "name": "admin",
+        "description": "Full administrative access to multi-cloud inventory and remediation"
+      },
+      {
+        "name": "analyst",
+        "description": "Analyst access to inspect drifts, evaluate ML models, and generate advisories"
+      },
+      {
+        "name": "viewer",
+        "description": "Read-only access to inventory snapshots and drift reports"
+      }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "cloud-inventory-client",
+      "name": "Multi-Cloud Inventory Diff SPA",
+      "enabled": true,
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": false,
+      "protocol": "openid-connect",
+      "redirectUris": [
+        "http://127.0.0.1:3000/*",
+        "http://localhost:3000/*"
+      ],
+      "webOrigins": [
+        "http://127.0.0.1:3000",
+        "http://localhost:3000",
+        "+"
+      ],
+      "fullScopeAllowed": true
+    }
+  ],
+  "identityProviders": [
+    {
+      "alias": "saml-enterprise-idp",
+      "displayName": "Enterprise SAML SSO",
+      "providerId": "saml",
+      "enabled": false,
+      "trustEmail": true,
+      "storeToken": false,
+      "addReadTokenRoleOnCreate": false,
+      "firstBrokerLoginFlowAlias": "first broker login",
+      "config": {
+        "entityId": "http://127.0.0.1:8080/realms/cloud-inventory",
+        "singleSignOnServiceUrl": "https://idp.example.com/saml/sso",
+        "nameIDPolicyFormat": "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress",
+        "signatureAlgorithm": "RSA_SHA256",
+        "authnContextClassRefs": "[\"urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport\"]",
+        "syncMode": "IMPORT"
+      }
+    }
+  ],
+  "users": [
+    {
+      "username": "ryan.analyst",
+      "enabled": true,
+      "email": "ryan.analyst@example.com",
+      "firstName": "Ryan",
+      "lastName": "Analyst",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "analyst123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "analyst"
+      ]
+    },
+    {
+      "username": "admin",
+      "enabled": true,
+      "email": "admin@example.com",
+      "firstName": "System",
+      "lastName": "Admin",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "admin123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "admin"
+      ]
+    }
+  ]
+}

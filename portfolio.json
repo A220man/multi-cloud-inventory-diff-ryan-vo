@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "name": "multi-cloud-inventory-diff-ryan-vo",
+  "owner": "A220man",
+  "email": "ryandtvo@gmail.com",
+  "domain": "cloud",
+  "summary": "Multi-cloud asset normalization across AWS, GCP, and Azure with deterministic configuration drift diffing, supervised ML exposure risk classification, and reproducible benchmark evaluations.",
+  "workflows": [
+    "Multi-cloud asset export ingestion and canonical normalization across AWS, GCP, and Azure",
+    "Deterministic snapshot diffing with ownership and exposure escalation grouping",
+    "Supervised machine learning configuration drift severity classification and anomaly scoring",
+    "Opt-in multi-provider LLM remediation advisory synthesis grounded in diff telemetry"
+  ],
+  "auth": "oidc-keycloak-saml-broker",
+  "llm_providers": [
+    "openai-compatible",
+    "anthropic",
+    "gemini",
+    "ollama"
+  ],
+  "version": "1.0.0"
+}
