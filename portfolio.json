@@ -4,7 +4,7 @@
   "owner": "A220man",
   "email": "ryandtvo@gmail.com",
   "domain": "cloud",
-  "summary": "Multi-cloud asset normalization across AWS, GCP, and Azure with deterministic configuration drift diffing, supervised ML exposure risk classification, and reproducible benchmark evaluations.",
+  "summary": "Work in progress: multi-cloud-inventory-diff-ryan-vo",
   "workflows": [
     "Multi-cloud asset export ingestion and canonical normalization across AWS, GCP, and Azure",
     "Deterministic snapshot diffing with ownership and exposure escalation grouping",
@@ -18,5 +18,6 @@
     "gemini",
     "ollama"
   ],
-  "version": "1.0.0"
+  "version": "1.0.0",
+  "status": "work-in-progress"
 }

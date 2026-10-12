@@ -35,6 +35,7 @@ const mockApi = vi.hoisted(() => ({
   deleteSnapshot: vi.fn(),
   seedSampleSnapshots: vi.fn(),
   computeDiff: vi.fn(),
+  listDiffs: vi.fn().mockResolvedValue([]),
   getDiff: vi.fn(),
   evaluateDiff: vi.fn(),
   getMLBenchmark: vi.fn().mockResolvedValue({
@@ -240,6 +241,56 @@ describe('SnapshotsPage', () => {
       { isAuthenticated: true, token: 'tok', role: 'operator', username: 'alice' }
     );
     await waitFor(() => expect(screen.getByText(/No snapshots yet/i)).toBeInTheDocument());
+  });
+
+  it('computes diff when Compare Snapshots is clicked with distinct selections', async () => {
+    const onNavigate = vi.fn();
+    mockApi.listSnapshots.mockResolvedValueOnce([
+      { id: 'snap-1', name: 'Base Snap', cloud_provider: 'aws', source_type: 'export', asset_count: 2, description: null, created_by: 'op', created_at: new Date().toISOString() },
+      { id: 'snap-2', name: 'Drift Snap', cloud_provider: 'aws', source_type: 'export', asset_count: 3, description: null, created_by: 'op', created_at: new Date().toISOString() },
+    ]);
+    mockApi.listDiffs.mockResolvedValueOnce([]);
+    mockApi.computeDiff.mockResolvedValueOnce({ id: 'diff-run-456' });
+
+    renderWithAuth(
+      <SnapshotsPage onNavigateToDiff={onNavigate} />,
+      { isAuthenticated: true, token: 'tok', role: 'operator', username: 'alice' }
+    );
+
+    await waitFor(() => expect(screen.getByText(/Snapshot Pair Comparator/i)).toBeInTheDocument());
+    const compareBtn = screen.getByRole('button', { name: /Compare Snapshots/i });
+    fireEvent.click(compareBtn);
+
+    await waitFor(() => {
+      expect(mockApi.computeDiff).toHaveBeenCalledWith('snap-1', 'snap-2', 'tok');
+      expect(onNavigate).toHaveBeenCalledWith('diff-run-456');
+    });
+  });
+
+  it('renders recent diff comparisons history', async () => {
+    mockApi.listSnapshots.mockResolvedValueOnce([
+      { id: 'snap-1', name: 'Base Snap', cloud_provider: 'aws', source_type: 'export', asset_count: 2, description: null, created_by: 'op', created_at: new Date().toISOString() },
+    ]);
+    mockApi.listDiffs.mockResolvedValueOnce([
+      {
+        id: 'diff-hist-789',
+        base_snapshot_id: 'snap-1',
+        target_snapshot_id: 'snap-2',
+        added_count: 3,
+        removed_count: 1,
+        modified_count: 2,
+        created_by: 'operator',
+        created_at: new Date().toISOString(),
+      },
+    ]);
+
+    renderWithAuth(
+      <SnapshotsPage onNavigateToDiff={vi.fn()} />,
+      { isAuthenticated: true, token: 'tok', role: 'operator', username: 'alice' }
+    );
+
+    await waitFor(() => expect(screen.getByText(/Recent Comparison Runs/i)).toBeInTheDocument());
+    expect(screen.getByText(/diff-his/)).toBeInTheDocument();
   });
 });
 

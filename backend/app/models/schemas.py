@@ -5,18 +5,18 @@ from pydantic import BaseModel, Field
 
 
 class CanonicalAsset(BaseModel):
-    resource_id: str = Field(..., description="Unique cross-cloud resource identifier (ARN, URN, or Resource ID)")
-    resource_name: str = Field(..., description="Human-readable resource name")
-    resource_type: str = Field(..., description="Standardized resource type (e.g. compute.instance, storage.bucket, iam.role)")
-    cloud_provider: Literal["aws", "gcp", "azure"] = Field(..., description="Cloud provider")
-    region: str = Field(default="global", description="Deployment region or location")
-    account_id: str = Field(..., description="Account, Project, or Subscription identifier")
-    owner: Optional[str] = Field(default=None, description="Assigned owner or team tag")
-    exposure_level: Literal["private", "internal", "public"] = Field(default="private", description="Network exposure level")
-    network_config: dict[str, Any] = Field(default_factory=dict, description="CIDRs, security groups, public IPs, open ports")
-    iam_config: dict[str, Any] = Field(default_factory=dict, description="Attached policies, admin privileges, service principals")
-    tags: dict[str, str] = Field(default_factory=dict, description="Resource tags / labels")
-    raw_metadata: dict[str, Any] = Field(default_factory=dict, description="Raw provider export properties")
+    resource_id: str
+    resource_name: str
+    resource_type: str
+    cloud_provider: Literal["aws", "gcp", "azure"]
+    region: str = "global"
+    account_id: str
+    owner: Optional[str] = None
+    exposure_level: Literal["private", "internal", "public"] = "private"
+    network_config: dict[str, Any] = Field(default_factory=dict)
+    iam_config: dict[str, Any] = Field(default_factory=dict)
+    tags: dict[str, str] = Field(default_factory=dict)
+    raw_metadata: dict[str, Any] = Field(default_factory=dict)
 
     @classmethod
     def from_record(cls, a: Any) -> "CanonicalAsset":
@@ -38,11 +38,11 @@ class CanonicalAsset(BaseModel):
 
 class SnapshotCreate(BaseModel):
     name: str = Field(..., min_length=1, max_length=128)
-    cloud_provider: Literal["aws", "gcp", "azure", "multi-cloud"] = Field(...)
+    cloud_provider: Literal["aws", "gcp", "azure", "multi-cloud"]
     source_type: str = Field(default="export-json", max_length=64)
     description: Optional[str] = Field(default=None, max_length=255)
     assets: list[CanonicalAsset] = Field(default_factory=list)
-    raw_payload: Optional[list[dict[str, Any]]] = Field(default=None, description="Optional raw provider export array")
+    raw_payload: Optional[list[dict[str, Any]]] = None
 
 
 class SnapshotSummary(BaseModel):
@@ -102,6 +102,17 @@ class DiffResponse(BaseModel):
     items: list[DiffItem]
     exposure_summary: dict[str, int]
     owner_grouping: list[OwnerGroup]
+    created_by: str
+    created_at: datetime
+
+
+class DiffSummary(BaseModel):
+    id: str
+    base_snapshot_id: str
+    target_snapshot_id: str
+    added_count: int
+    removed_count: int
+    modified_count: int
     created_by: str
     created_at: datetime
 

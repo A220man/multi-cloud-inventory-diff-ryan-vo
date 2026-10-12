@@ -51,10 +51,21 @@ def test_full_api_workflow(client):
     assert diff_data["exposure_summary"]["exposure_escalated"] > 0
     assert len(diff_data["owner_grouping"]) > 0
 
-    # 7. Retrieve Diff Details
+    # 7. Retrieve Diff Details and List Diffs
     get_diff_resp = client.get(f"/api/diffs/{diff_id}", headers=auth_headers)
     assert get_diff_resp.status_code == 200
     assert get_diff_resp.json()["id"] == diff_id
+
+    # 7b. List Historical Diffs and Filter by Snapshot
+    list_diffs_resp = client.get("/api/diffs?limit=10", headers=auth_headers)
+    assert list_diffs_resp.status_code == 200
+    diffs_list = list_diffs_resp.json()
+    assert len(diffs_list) >= 1
+    assert any(d["id"] == diff_id for d in diffs_list)
+
+    filter_diffs_resp = client.get(f"/api/diffs?snapshot_id={base_id}", headers=auth_headers)
+    assert filter_diffs_resp.status_code == 200
+    assert all(d["base_snapshot_id"] == base_id or d["target_snapshot_id"] == base_id for d in filter_diffs_resp.json())
 
     # 8. Run ML Severity & Anomaly Evaluation
     ml_resp = client.post(

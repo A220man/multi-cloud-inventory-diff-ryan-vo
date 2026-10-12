@@ -65,15 +65,9 @@ class MultiCloudNormalizer:
             resource_id=raw.get("resourceId") or raw.get("id") or raw.get("arn") or str(raw.get("resourceName", "unknown")),
             resource_name=raw.get("resourceName") or raw.get("resourceId") or "unknown",
             resource_type=MultiCloudNormalizer._map_resource_type(raw_type, "aws"),
-            cloud_provider="aws",
-            region=region,
-            account_id=account_id,
-            owner=owner,
-            exposure_level=exposure,
-            network_config={"public_ip": public_ip, "open_ports": open_ports},
-            iam_config=iam_config,
-            tags=tags,
-            raw_metadata=raw,
+            cloud_provider="aws", region=region, account_id=account_id, owner=owner,
+            exposure_level=exposure, network_config={"public_ip": public_ip, "open_ports": open_ports},
+            iam_config=iam_config, tags=tags, raw_metadata=raw,
         )
 
     @staticmethod
@@ -102,18 +96,11 @@ class MultiCloudNormalizer:
             bindings = config.get("bindings", [])
             iam_config = {"has_admin_privilege": any("roles/Owner" in str(b) or "roles/Editor" in str(b) for b in bindings)}
         return CanonicalAsset(
-            resource_id=name,
-            resource_name=config.get("name") or name.split("/")[-1],
+            resource_id=name, resource_name=config.get("name") or name.split("/")[-1],
             resource_type=MultiCloudNormalizer._map_resource_type(raw_type, "gcp"),
-            cloud_provider="gcp",
-            region=location,
-            account_id=project,
-            owner=owner,
-            exposure_level=exposure,
-            network_config={"public_ip": public_ip, "open_ports": open_ports},
-            iam_config=iam_config,
-            tags=tags,
-            raw_metadata=raw,
+            cloud_provider="gcp", region=location, account_id=project, owner=owner,
+            exposure_level=exposure, network_config={"public_ip": public_ip, "open_ports": open_ports},
+            iam_config=iam_config, tags=tags, raw_metadata=raw,
         )
 
     @staticmethod
@@ -142,18 +129,11 @@ class MultiCloudNormalizer:
             roles = config.get("roleAssignments", [])
             iam_config = {"has_admin_privilege": any("Owner" in str(r) or "Contributor" in str(r) for r in roles)}
         return CanonicalAsset(
-            resource_id=rid,
-            resource_name=raw.get("name") or (rid.split("/")[-1] if "/" in rid else "unknown"),
+            resource_id=rid, resource_name=raw.get("name") or (rid.split("/")[-1] if "/" in rid else "unknown"),
             resource_type=MultiCloudNormalizer._map_resource_type(raw_type, "azure"),
-            cloud_provider="azure",
-            region=location,
-            account_id=subscription,
-            owner=owner,
-            exposure_level=exposure,
-            network_config={"public_ip": public_ip, "open_ports": open_ports},
-            iam_config=iam_config,
-            tags=tags,
-            raw_metadata=raw,
+            cloud_provider="azure", region=location, account_id=subscription, owner=owner,
+            exposure_level=exposure, network_config={"public_ip": public_ip, "open_ports": open_ports},
+            iam_config=iam_config, tags=tags, raw_metadata=raw,
         )
 
     @staticmethod

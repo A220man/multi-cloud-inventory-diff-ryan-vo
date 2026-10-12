@@ -3,25 +3,9 @@
  * All endpoints require Bearer token auth (retrieved from AuthContext).
  */
 import type {
-  SnapshotSummary,
-  SnapshotDetail,
-  SnapshotCreateRequest,
-  DiffResponse,
-  DiffItem,
-  FieldDelta,
-  OwnerGroup,
-  MLFeatureVector,
-  MLItemEvaluation,
-  MLEvaluationResponse,
-  MLBenchmarkResult,
-  LLMAdvisoryResponse,
-  RemediateAction,
-  AuditLogEntry,
-  SeedResponse,
-  AuthState,
-  DemoLoginRequest,
-  LLMProvider,
-  SeverityLevel,
+  SnapshotSummary, SnapshotDetail, SnapshotCreateRequest, DiffResponse,
+  DiffSummary, MLEvaluationResponse, MLBenchmarkResult, LLMAdvisoryResponse,
+  AuditLogEntry, SeedResponse, AuthState, DemoLoginRequest, LLMProvider,
 } from '../types';
 
 const BASE = '/api';
@@ -104,6 +88,20 @@ export async function getDiff(id: string, token: string): Promise<DiffResponse> 
   return request<DiffResponse>(`/diffs/${id}`, {}, token);
 }
 
+export async function listDiffs(
+  token: string,
+  snapshotId?: string,
+  limit = 50,
+  offset = 0
+): Promise<DiffSummary[]> {
+  const params = new URLSearchParams({
+    limit: String(limit),
+    offset: String(offset),
+    ...(snapshotId ? { snapshot_id: snapshotId } : {}),
+  });
+  return request<DiffSummary[]>(`/diffs?${params.toString()}`, {}, token);
+}
+
 // ─── ML Evaluation ───────────────────────────────────────────────────────────
 export async function evaluateDiff(
   diffId: string,
@@ -145,24 +143,4 @@ export async function listAuditLogs(
 
 export { ApiError };
 
-export type {
-  SnapshotSummary,
-  SnapshotDetail,
-  SnapshotCreateRequest,
-  DiffResponse,
-  DiffItem,
-  FieldDelta,
-  OwnerGroup,
-  MLFeatureVector,
-  MLItemEvaluation,
-  MLEvaluationResponse,
-  MLBenchmarkResult,
-  LLMAdvisoryResponse,
-  RemediateAction,
-  AuditLogEntry,
-  SeedResponse,
-  AuthState,
-  DemoLoginRequest,
-  LLMProvider,
-  SeverityLevel,
-};
+export type * from '../types';
