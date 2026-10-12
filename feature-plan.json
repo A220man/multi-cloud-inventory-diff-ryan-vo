@@ -1,0 +1,148 @@
+{
+  "schema_version": 1,
+  "current_feature": "diff-history-and-pair-comparison",
+  "features": [
+    {
+      "id": "multi-cloud-normalization",
+      "title": "Cross-Cloud Resource Schema Normalizer",
+      "status": "done",
+      "acceptance": [
+        "Normalize AWS Config, GCP Cloud Asset Inventory, and Azure Resource Graph exports into CanonicalAsset schema",
+        "Extract standardized exposure levels, network configurations, and IAM privileges"
+      ],
+      "implementation": [
+        "backend/app/services/normalizer.py"
+      ],
+      "tests": [
+        "backend/tests/test_normalizer.py"
+      ]
+    },
+    {
+      "id": "deterministic-diff-engine",
+      "title": "Deterministic Multi-Cloud Inventory Diff Engine",
+      "status": "done",
+      "acceptance": [
+        "Detect added, removed, and modified cross-cloud resources between snapshots",
+        "Identify security-relevant property drifts including exposure escalations and unowned assets"
+      ],
+      "implementation": [
+        "backend/app/services/diff_engine.py"
+      ],
+      "tests": [
+        "backend/tests/test_diff_engine.py"
+      ]
+    },
+    {
+      "id": "ml-drift-risk-classifier",
+      "title": "Supervised Drift Risk Severity Classifier",
+      "status": "done",
+      "acceptance": [
+        "Classify configuration drift into LOW, MEDIUM, HIGH, and CRITICAL severity tiers",
+        "Provide offline benchmark evaluation exceeding naive rule-based baseline on macro F1"
+      ],
+      "implementation": [
+        "backend/app/ml/classifier.py",
+        "backend/app/ml/dataset.py",
+        "backend/app/ml/evaluate.py"
+      ],
+      "tests": [
+        "backend/tests/test_ml_classifier.py"
+      ]
+    },
+    {
+      "id": "grounded-llm-remediation-advisor",
+      "title": "Grounded LLM Remediation Advisor",
+      "status": "done",
+      "acceptance": [
+        "Generate multi-cloud remediation recommendations grounded in actual diff records",
+        "Support pluggable LLM adapters with graceful offline deterministic fallback"
+      ],
+      "implementation": [
+        "backend/app/services/llm_advisor.py"
+      ],
+      "tests": [
+        "backend/tests/test_api_workflows.py"
+      ]
+    },
+    {
+      "id": "oidc-and-demo-security",
+      "title": "Role-Based Access Control and OIDC Authentication",
+      "status": "done",
+      "acceptance": [
+        "Enforce viewer, operator, and admin role authorization across data endpoints",
+        "Provide local-only demo authentication mode while rejecting unauthenticated access"
+      ],
+      "implementation": [
+        "backend/app/core/auth.py"
+      ],
+      "tests": [
+        "backend/tests/test_auth_and_security.py"
+      ]
+    },
+    {
+      "id": "react-drift-dashboard",
+      "title": "Interactive Multi-Cloud Inventory Frontend",
+      "status": "done",
+      "acceptance": [
+        "Visualize inventory statistics, diff deltas, and ML risk evaluation breakdowns",
+        "Support sample snapshot loading, offline benchmark viewing, and audit logs"
+      ],
+      "implementation": [
+        "frontend/src/App.tsx",
+        "frontend/src/components/Dashboard.tsx",
+        "frontend/src/components/DiffPage.tsx",
+        "frontend/src/components/MLPage.tsx"
+      ],
+      "tests": [
+        "frontend/src/test/app.test.tsx"
+      ]
+    },
+    {
+      "id": "diff-history-and-pair-comparison",
+      "title": "Diff History API and Snapshot Pair Comparator",
+      "status": "done",
+      "acceptance": [
+        "List historical comparison runs via GET /api/diffs with pagination and snapshot filtering",
+        "Allow operators to select arbitrary base and target snapshot pairs in the UI",
+        "Validate selection against identical snapshots and render recent comparison history"
+      ],
+      "implementation": [
+        "backend/app/api/endpoints.py",
+        "backend/app/models/schemas.py",
+        "frontend/src/services/api.ts",
+        "frontend/src/components/SnapshotsPage.tsx"
+      ],
+      "tests": [
+        "backend/tests/test_api_workflows.py",
+        "frontend/src/test/app.test.tsx"
+      ]
+    },
+    {
+      "id": "real-time-webhook-ingestion",
+      "title": "Real-Time Cloud Inventory Webhook Ingestion",
+      "status": "planned",
+      "acceptance": [
+        "Receive asset change notifications via HMAC-authenticated webhook",
+        "Trigger automated diff calculation against the latest baseline snapshot"
+      ]
+    },
+    {
+      "id": "policy-as-code-opa-rules",
+      "title": "Open Policy Agent Rego Compliance Evaluation",
+      "status": "planned",
+      "acceptance": [
+        "Evaluate custom Open Policy Agent Rego rules against normalized canonical assets",
+        "Surface policy compliance violations alongside ML severity classifications"
+      ]
+    },
+    {
+      "id": "exportable-compliance-audit-bundle",
+      "title": "Exportable Signed Compliance Audit Bundles",
+      "status": "planned",
+      "acceptance": [
+        "Generate signed JSON-LD and CSV compliance audit report bundles",
+        "Include complete snapshot lineage, diff evidence, and reviewer approval signatures"
+      ]
+    }
+  ]
+}

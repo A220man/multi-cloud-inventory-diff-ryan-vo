@@ -1,5 +1,8 @@
 # Multi-Cloud Inventory Diff | Ryan Vo | AI & Machine Learning
 
+> Work in progress. This checkpoint may be incomplete or fail tests. See PLAN.md and STATUS.md before use.
+
+
 Current version: `1.0.0`.
 
 A production-ready multi-cloud asset inventory and drift detection platform. The system ingests and standardizes asset exports across **AWS**, **GCP**, and **Azure**, runs deterministic field-level configuration diffing, classifies security exposure risk via a supervised machine learning engine, and provides opt-in advisory recommendations with grounded multi-provider LLM support.
@@ -143,10 +146,13 @@ All data endpoints require Bearer JWT authentication (or active local demo mode)
 | `POST` | `/api/snapshots/sample-seed` | `operator` / `admin` | Seed base and drifted snapshots for immediate testing |
 | `GET` | `/api/snapshots/{id}` | `viewer` | Retrieve snapshot details and canonical asset records |
 | `DELETE` | `/api/snapshots/{id}` | `admin` | Delete snapshot and associated assets |
-| `POST` | `/api/diffs` | `viewer` | Compute deterministic diff between two snapshots |
-| `POST` | `/api/ml/evaluate` | `viewer` | Run offline ML classifier benchmark on ground-truth dataset |
-| `POST` | `/api/advisory/generate` | `analyst` / `admin` | Generate grounded LLM remediation advisory |
-| `GET` | `/api/audit` | `admin` | Query append-only audit trail with pagination and filtering |
+| `POST` | `/api/diffs` | `operator` / `admin` | Compute deterministic diff between two snapshots |
+| `GET` | `/api/diffs` | `viewer` | List historical snapshot comparison runs with pagination and filtering |
+| `GET` | `/api/diffs/{id}` | `viewer` | Retrieve calculated diff result and change deltas |
+| `POST` | `/api/ml/evaluate` | `operator` / `admin` | Evaluate diff using ML risk classifier |
+| `GET` | `/api/ml/benchmark` | `viewer` | Retrieve offline ML benchmark metrics and failure analysis |
+| `POST` | `/api/advisory/generate` | `operator` / `admin` | Generate grounded LLM remediation advisory |
+| `GET` | `/api/audit` | `viewer` | Query append-only audit trail with pagination and filtering |
 
 ---
 

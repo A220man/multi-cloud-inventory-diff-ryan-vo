@@ -18,6 +18,9 @@ def test_unauthenticated_requests_rejected(client):
     assert resp.status_code == 401
     assert "Authorization" in resp.json().get("detail", "")
 
+    diffs_resp = client.get("/api/diffs")
+    assert diffs_resp.status_code == 401
+
 
 def test_role_based_access_denial(client):
     # Viewer token should be rejected on operator-only POST /api/snapshots

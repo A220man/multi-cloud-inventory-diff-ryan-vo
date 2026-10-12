@@ -48,17 +48,20 @@ class AssetRecord(Base):
 
     snapshot = relationship("SnapshotRecord", back_populates="assets")
 
+    def _j(self, val: str) -> Any:
+        return json.loads(val) if val else {}
+
     def get_network_config(self) -> dict[str, Any]:
-        return json.loads(self.network_config_json) if self.network_config_json else {}
+        return self._j(self.network_config_json)
 
     def get_iam_config(self) -> dict[str, Any]:
-        return json.loads(self.iam_config_json) if self.iam_config_json else {}
+        return self._j(self.iam_config_json)
 
     def get_tags(self) -> dict[str, str]:
-        return json.loads(self.tags_json) if self.tags_json else {}
+        return self._j(self.tags_json)
 
     def get_raw_metadata(self) -> dict[str, Any]:
-        return json.loads(self.raw_metadata_json) if self.raw_metadata_json else {}
+        return self._j(self.raw_metadata_json)
 
 
 class DiffRecord(Base):
