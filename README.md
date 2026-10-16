@@ -3,7 +3,10 @@
 > Work in progress. This checkpoint may be incomplete or fail tests. See PLAN.md and STATUS.md before use.
 
 
-Current version: `1.0.0`.
+> Development checkpoint. Tests pass; see PLAN.md and STATUS.md for known limitations.
+
+
+Current version: `1.1.0`.
 
 A production-ready multi-cloud asset inventory and drift detection platform. The system ingests and standardizes asset exports across **AWS**, **GCP**, and **Azure**, runs deterministic field-level configuration diffing, classifies security exposure risk via a supervised machine learning engine, and provides opt-in advisory recommendations with grounded multi-provider LLM support.
 

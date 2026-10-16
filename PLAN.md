@@ -4,7 +4,7 @@ Each round completes one feature or repair. Future items are planned, not implem
 
 ## Current round
 
-diff-history-and-pair-comparison
+demo-login-envelope-repair
 
 ## Roadmap
 
@@ -116,4 +116,17 @@ Status: planned
 Acceptance:
 - Generate signed JSON-LD and CSV compliance audit report bundles
 - Include complete snapshot lineage, diff evidence, and reviewer approval signatures
+
+### demo-login-envelope-repair — Repair Demo Login Envelope Mapping and Role Passthrough
+
+Status: done
+
+Acceptance:
+- Demo login forwards the selected role and username to the backend
+- Frontend maps the backend access_token envelope to AuthState
+- Authenticated session persists after demo login and authorizes API calls
+
+Implementation: `frontend/src/services/api.ts`
+
+Tests: `frontend/src/test/login_api.test.ts`, `backend/tests/test_auth_and_security.py`
 

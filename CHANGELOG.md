@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.0 — work-in-progress checkpoint
+
+Partial code published for continued development. Known issues: STATUS.md.
+
 ## 1.1.0 — work-in-progress checkpoint
 
 Partial code published for continued development. Known issues: STATUS.md.
@@ -16,6 +20,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Historical diff query endpoint `GET /api/diffs` supporting pagination (`limit`, `offset`) and snapshot filtering (`snapshot_id`).
 - Recent Comparison Runs table on the Snapshots page linking directly to detailed diff inspections.
 - Frontend and backend test coverage for pairwise comparison workflows, validation of distinct snapshots, and diff history retrieval.
+
+### Fixed
+- Demo login client now forwards the selected role/username and maps the backend `access_token` envelope to `AuthState` (`token`, `isAuthenticated`), restoring an authenticated session after local demo sign-in.
 
 ## [1.0.0] - 2026-10-09
 
