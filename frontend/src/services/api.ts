@@ -5,7 +5,7 @@
 import type {
   SnapshotSummary, SnapshotDetail, SnapshotCreateRequest, DiffResponse,
   DiffSummary, MLEvaluationResponse, MLBenchmarkResult, LLMAdvisoryResponse,
-  AuditLogEntry, SeedResponse, AuthState, DemoLoginRequest, LLMProvider,
+  AuditLogEntry, SeedResponse, AuthState, DemoLoginRequest, LLMProvider, UserRole,
 } from '../types';
 
 const BASE = '/api';
@@ -42,8 +42,11 @@ async function request<T>(
 }
 
 // ─── Auth ────────────────────────────────────────────────────────────────────
-export async function loginDemo(_payload: DemoLoginRequest): Promise<AuthState> {
-  return request<AuthState>('/auth/demo-token', { method: 'POST', headers: { 'Content-Type': 'application/json' } }, undefined);
+export async function loginDemo(payload: DemoLoginRequest): Promise<AuthState> {
+  const data = await request<{ access_token: string; role: string; username: string; expires_in: number }>(
+    '/auth/demo-token', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) },
+  );
+  return { token: data.access_token, role: data.role as UserRole, username: data.username, isAuthenticated: true };
 }
 
 // ─── Health ───────────────────────────────────────────────────────────────────

@@ -58,3 +58,17 @@ def test_redact_sensitive_strings():
     redacted = redact_sensitive(log_line)
     assert "[REDACTED]" in redacted
     assert ("mocktoken" * 4) not in redacted
+
+
+def test_demo_token_response_envelope(client):
+    """The demo-token envelope (access_token/role/username) must match the typed
+    frontend client's mapping contract so login persists a real session."""
+    resp = client.post(
+        "/api/auth/demo-token", json={"role": "viewer", "username": "alice"}
+    )
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["access_token"]  # non-empty signed token
+    assert body["role"] == "viewer"  # role forwarded from request
+    assert body["username"] == "alice"  # username forwarded from request
+    assert "expires_in" in body and isinstance(body["expires_in"], int)

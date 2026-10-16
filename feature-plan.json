@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "current_feature": "diff-history-and-pair-comparison",
+  "current_feature": "demo-login-envelope-repair",
   "features": [
     {
       "id": "multi-cloud-normalization",
@@ -142,6 +142,21 @@
       "acceptance": [
         "Generate signed JSON-LD and CSV compliance audit report bundles",
         "Include complete snapshot lineage, diff evidence, and reviewer approval signatures"
+      ]
+    },
+    {
+      "id": "demo-login-envelope-repair",
+      "title": "Repair Demo Login Envelope Mapping and Role Passthrough",
+      "status": "done",
+      "acceptance": [
+        "Demo login forwards the selected role and username to the backend",
+        "Frontend maps the backend access_token envelope to AuthState",
+        "Authenticated session persists after demo login and authorizes API calls"
+      ],
+      "implementation": ["frontend/src/services/api.ts"],
+      "tests": [
+        "frontend/src/test/login_api.test.ts",
+        "backend/tests/test_auth_and_security.py"
       ]
     }
   ]
