@@ -209,3 +209,9 @@ class DemoTokenResponse(BaseModel):
     role: str
     username: str
     expires_in: int
+class WebhookIngestResponse(BaseModel):
+    snapshot_id: str
+    diff_id: Optional[str] = None
+    assets_processed: int
+    baseline_snapshot_id: Optional[str] = None
+    changes_detected: bool

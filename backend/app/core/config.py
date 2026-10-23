@@ -34,6 +34,10 @@ class Settings(BaseSettings):
     LLM_BASE_URL: str = Field(default="https://api.openai.com/v1", description="Provider API base URL")
     LLM_API_KEY: Optional[str] = Field(default=None, description="Operator API Key for LLM advisory")
     LLM_TIMEOUT_SECONDS: float = Field(default=15.0, description="HTTP timeout for LLM calls")
+    # Webhook HMAC Secrets (one per cloud provider)
+    WEBHOOK_SECRET_AWS: Optional[str] = Field(default=None, description="HMAC secret for AWS webhooks")
+    WEBHOOK_SECRET_GCP: Optional[str] = Field(default=None, description="HMAC secret for GCP webhooks")
+    WEBHOOK_SECRET_AZURE: Optional[str] = Field(default=None, description="HMAC secret for Azure webhooks")
 
     @field_validator("DEMO_MODE")
     @classmethod
