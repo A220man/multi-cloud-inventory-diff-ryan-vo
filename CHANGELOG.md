@@ -1,9 +1,18 @@
 # Changelog
 
-## 1.2.0 — work-in-progress checkpoint
+## 1.3.0 — work-in-progress checkpoint
 
 Partial code published for continued development. Known issues: STATUS.md.
 
+## 1.2.0 — work-in-progress checkpoint
+
+### Added
+- Real-time cloud inventory webhook ingestion with HMAC-SHA256 authentication for AWS, GCP, and Azure asset change notifications.
+- Automated diff calculation against the latest baseline snapshot upon webhook receipt.
+- Per-provider HMAC secret configuration with timestamp-based replay protection (5-minute drift window).
+- Operator-role protected webhook endpoint `POST /api/webhooks/{provider}` with full test coverage.
+
+Partial code published for continued development. Known issues: STATUS.md.
 ## 1.1.0 — work-in-progress checkpoint
 
 Partial code published for continued development. Known issues: STATUS.md.

@@ -4,7 +4,7 @@ import json
 from typing import Optional
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from sqlalchemy.orm import Session
 
 from app.core.auth import AuthUser, create_demo_token, require_role
@@ -30,11 +30,13 @@ from app.models.schemas import (
     SnapshotCreate,
     SnapshotDetail,
     SnapshotSummary,
+    WebhookIngestResponse,
 )
 from app.services.audit import AuditService
 from app.services.diff_engine import DiffEngine
 from app.services.llm_advisor import generate_advisory
 from app.services.normalizer import MultiCloudNormalizer
+from app.services.webhook import WebhookService
 
 api_router = APIRouter()
 
@@ -403,3 +405,26 @@ def list_audit_logs(
     user: AuthUser = Depends(require_role("viewer")),
 ):
     return AuditService.get_events(db=db, limit=limit, offset=offset, action=action, resource_type=resource_type)
+@api_router.post("/webhooks/{provider}", response_model=WebhookIngestResponse)
+async def ingest_webhook(
+    provider: str,
+    request: Request,
+    db: Session = Depends(get_db),
+    user: AuthUser = Depends(require_role("operator")),
+):
+    """
+    Ingest cloud inventory change webhook with HMAC authentication.
+
+    Supported providers: aws, gcp, azure
+    Requires headers:
+    - X-Cloud-Inventory-Signature: HMAC-SHA256 of request body
+    - X-Cloud-Inventory-Timestamp: Unix timestamp (within 5 min drift)
+    """
+    if provider.lower() not in ("aws", "gcp", "azure"):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Unsupported provider: {provider}. Supported: aws, gcp, azure"
+        )
+
+    result = await WebhookService.ingest_webhook(provider.lower(), request, db, user.username)
+    return WebhookIngestResponse(**result)

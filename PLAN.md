@@ -4,7 +4,7 @@ Each round completes one feature or repair. Future items are planned, not implem
 
 ## Current round
 
-demo-login-envelope-repair
+real-time-webhook-ingestion
 
 ## Roadmap
 
@@ -95,11 +95,15 @@ Tests: `backend/tests/test_api_workflows.py`, `frontend/src/test/app.test.tsx`
 
 ### real-time-webhook-ingestion — Real-Time Cloud Inventory Webhook Ingestion
 
-Status: planned
+Status: done
 
 Acceptance:
 - Receive asset change notifications via HMAC-authenticated webhook
 - Trigger automated diff calculation against the latest baseline snapshot
+
+Implementation: `backend/app/api/endpoints.py`, `backend/app/services/webhook.py`, `backend/app/models/schemas.py`
+
+Tests: `backend/tests/test_webhook.py`
 
 ### policy-as-code-opa-rules — Open Policy Agent Rego Compliance Evaluation
 
