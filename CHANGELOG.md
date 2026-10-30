@@ -1,6 +1,13 @@
 # Changelog
 
+## 1.4.0 — work-in-progress checkpoint
+
+Partial code published for continued development. Known issues: STATUS.md.
+
 ## 1.3.0 — work-in-progress checkpoint
+
+### Added
+- Audit logging for webhook ingestion (INGEST_WEBHOOK action) recording provider, assets processed, baseline snapshot, changes detected, and diff ID.
 
 Partial code published for continued development. Known issues: STATUS.md.
 
