@@ -427,4 +427,22 @@ async def ingest_webhook(
         )
 
     result = await WebhookService.ingest_webhook(provider.lower(), request, db, user.username)
+
+    # Audit log the webhook ingestion
+    AuditService.record_event(
+        db=db,
+        actor=user.username,
+        role=user.roles[0] if user.roles else "operator",
+        action="INGEST_WEBHOOK",
+        resource_type="webhook",
+        resource_id=result["snapshot_id"],
+        details={
+            "provider": provider.lower(),
+            "assets_processed": result["assets_processed"],
+            "baseline_snapshot_id": result.get("baseline_snapshot_id"),
+            "changes_detected": result["changes_detected"],
+            "diff_id": result.get("diff_id"),
+        },
+    )
+
     return WebhookIngestResponse(**result)
