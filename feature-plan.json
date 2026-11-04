@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "current_feature": "real-time-webhook-ingestion",
+  "current_feature": "policy-as-code-opa-rules",
   "features": [
     {
       "id": "multi-cloud-normalization",
@@ -137,10 +137,18 @@
     {
       "id": "policy-as-code-opa-rules",
       "title": "Open Policy Agent Rego Compliance Evaluation",
-      "status": "planned",
+      "status": "done",
       "acceptance": [
         "Evaluate custom Open Policy Agent Rego rules against normalized canonical assets",
         "Surface policy compliance violations alongside ML severity classifications"
+      ],
+      "implementation": [
+        "backend/app/services/opa_service.py",
+        "backend/app/api/endpoints.py",
+        "backend/app/models/schemas.py"
+      ],
+      "tests": [
+        "backend/tests/test_opa.py"
       ]
     },
     {

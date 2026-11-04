@@ -1,6 +1,19 @@
 # Changelog
 
+## 1.5.0 — work-in-progress checkpoint
+
+Partial code published for continued development. Known issues: STATUS.md.
+
 ## 1.4.0 — work-in-progress checkpoint
+
+### Added
+- Open Policy Agent (OPA) Rego compliance evaluation for canonical assets and diffs.
+- Policy management API: `POST /api/policies` (load), `GET /api/policies` (list), `DELETE /api/policies/{id}` (remove), `POST /api/policies/load-defaults` (load built-in policies).
+- Policy evaluation API: `POST /api/policies/evaluate` against snapshots or diffs with optional policy filtering.
+- Default Rego policies for: public exposure detection, unowned resources, overly permissive IAM (roles/owner, wildcard roles), unencrypted storage (S3, GCS), public S3 buckets, security groups open to world (SSH/RDP), diff exposure escalation, diff unowned new resources.
+- OPA service (`backend/app/services/opa_service.py`) with connection health check, policy CRUD, and batch evaluation.
+- Request/response schemas for policy management and evaluation.
+- Full test coverage in `backend/tests/test_opa.py` (14 tests).
 
 Partial code published for continued development. Known issues: STATUS.md.
 

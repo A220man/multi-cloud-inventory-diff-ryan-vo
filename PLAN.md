@@ -4,7 +4,7 @@ Each round completes one feature or repair. Future items are planned, not implem
 
 ## Current round
 
-real-time-webhook-ingestion
+policy-as-code-opa-rules
 
 ## Roadmap
 
@@ -107,11 +107,15 @@ Tests: `backend/tests/test_webhook.py`
 
 ### policy-as-code-opa-rules — Open Policy Agent Rego Compliance Evaluation
 
-Status: planned
+Status: done
 
 Acceptance:
 - Evaluate custom Open Policy Agent Rego rules against normalized canonical assets
 - Surface policy compliance violations alongside ML severity classifications
+
+Implementation: `backend/app/services/opa_service.py`, `backend/app/api/endpoints.py`, `backend/app/models/schemas.py`
+
+Tests: `backend/tests/test_opa.py`
 
 ### exportable-compliance-audit-bundle — Exportable Signed Compliance Audit Bundles
 
