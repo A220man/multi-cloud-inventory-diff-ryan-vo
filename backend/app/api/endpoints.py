@@ -26,6 +26,11 @@ from app.models.schemas import (
     LLMAdvisoryResponse,
     MLEvaluationRequest,
     MLEvaluationResponse,
+    OPAPolicyCreate,
+    OPAPolicyListResponse,
+    OPAPolicyResponse,
+    OPAEvaluationRequest,
+    OPAEvaluationResponse,
     OwnerGroup,
     SnapshotCreate,
     SnapshotDetail,
@@ -36,6 +41,7 @@ from app.services.audit import AuditService
 from app.services.diff_engine import DiffEngine
 from app.services.llm_advisor import generate_advisory
 from app.services.normalizer import MultiCloudNormalizer
+from app.services.opa_service import OPAService, load_default_policies
 from app.services.webhook import WebhookService
 
 api_router = APIRouter()
@@ -405,6 +411,167 @@ def list_audit_logs(
     user: AuthUser = Depends(require_role("viewer")),
 ):
     return AuditService.get_events(db=db, limit=limit, offset=offset, action=action, resource_type=resource_type)
+
+
+# OPA Policy Management Endpoints
+@api_router.post("/policies", response_model=OPAPolicyResponse, status_code=status.HTTP_201_CREATED)
+def create_opa_policy(
+    payload: OPAPolicyCreate,
+    db: Session = Depends(get_db),
+    user: AuthUser = Depends(require_role("admin")),
+):
+    """Load a new Rego policy into OPA."""
+    opa = OPAService()
+    if not opa.check_connection():
+        raise HTTPException(
+            status_code=503,
+            detail="OPA server not reachable. Ensure OPA is running on localhost:8181"
+        )
+    loaded = opa.load_policy(payload.policy_id, payload.rego_content)
+    if not loaded:
+        raise HTTPException(status_code=500, detail="Failed to load policy into OPA")
+
+    AuditService.record_event(
+        db=db, actor=user.username, role=user.roles[0] if user.roles else "admin",
+        action="CREATE_OPA_POLICY", resource_type="policy", resource_id=payload.policy_id,
+        details={"description": payload.description},
+    )
+    return OPAPolicyResponse(policy_id=payload.policy_id, description=payload.description, loaded=loaded)
+
+
+@api_router.get("/policies", response_model=OPAPolicyListResponse)
+def list_opa_policies(
+    db: Session = Depends(get_db),
+    user: AuthUser = Depends(require_role("viewer")),
+):
+    """List all loaded OPA policies."""
+    opa = OPAService()
+    if not opa.check_connection():
+        raise HTTPException(
+            status_code=503,
+            detail="OPA server not reachable. Ensure OPA is running on localhost:8181"
+        )
+    policy_ids = opa.list_policies()
+    policies = [OPAPolicyResponse(policy_id=pid, loaded=True) for pid in policy_ids]
+    return OPAPolicyListResponse(policies=policies)
+
+
+@api_router.delete("/policies/{policy_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_opa_policy(
+    policy_id: str,
+    db: Session = Depends(get_db),
+    user: AuthUser = Depends(require_role("admin")),
+):
+    """Delete an OPA policy."""
+    opa = OPAService()
+    if not opa.check_connection():
+        raise HTTPException(
+            status_code=503,
+            detail="OPA server not reachable. Ensure OPA is running on localhost:8181"
+        )
+    deleted = opa.delete_policy(policy_id)
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Policy not found or failed to delete")
+
+    AuditService.record_event(
+        db=db, actor=user.username, role=user.roles[0] if user.roles else "admin",
+        action="DELETE_OPA_POLICY", resource_type="policy", resource_id=policy_id,
+        details={},
+    )
+
+
+@api_router.post("/policies/load-defaults", response_model=dict[str, bool])
+def load_default_opa_policies(
+    db: Session = Depends(get_db),
+    user: AuthUser = Depends(require_role("admin")),
+):
+    """Load default compliance policies into OPA."""
+    opa = OPAService()
+    if not opa.check_connection():
+        raise HTTPException(
+            status_code=503,
+            detail="OPA server not reachable. Ensure OPA is running on localhost:8181"
+        )
+    results = load_default_policies(opa)
+
+    AuditService.record_event(
+        db=db, actor=user.username, role=user.roles[0] if user.roles else "admin",
+        action="LOAD_DEFAULT_OPA_POLICIES", resource_type="policy", resource_id="defaults",
+        details={"loaded_count": sum(1 for v in results.values() if v)},
+    )
+    return results
+
+
+# OPA Evaluation Endpoints
+@api_router.post("/policies/evaluate", response_model=OPAEvaluationResponse)
+def evaluate_opa_policies(
+    payload: OPAEvaluationRequest,
+    db: Session = Depends(get_db),
+    user: AuthUser = Depends(require_role("operator")),
+):
+    """
+    Evaluate OPA policies against a snapshot or diff.
+    Provide either snapshot_id or diff_id, not both.
+    """
+    opa = OPAService()
+    if not opa.check_connection():
+        raise HTTPException(
+            status_code=503,
+            detail="OPA server not reachable. Ensure OPA is running on localhost:8181"
+        )
+
+    if not payload.snapshot_id and not payload.diff_id:
+        raise HTTPException(status_code=400, detail="Must provide either snapshot_id or diff_id")
+    if payload.snapshot_id and payload.diff_id:
+        raise HTTPException(status_code=400, detail="Provide either snapshot_id or diff_id, not both")
+
+    if payload.snapshot_id:
+        snap = db.query(SnapshotRecord).filter(SnapshotRecord.id == payload.snapshot_id).first()
+        if not snap:
+            raise HTTPException(status_code=404, detail="Snapshot not found")
+        assets = [CanonicalAsset.from_record(a) for a in snap.assets]
+        input_data = OPAService.canonical_asset_to_opa_input([a.model_dump() for a in assets])
+    else:
+        diff = db.query(DiffRecord).filter(DiffRecord.id == payload.diff_id).first()
+        if not diff:
+            raise HTTPException(status_code=404, detail="Diff not found")
+        diff_items = [DiffItem(**i) for i in json.loads(diff.diff_payload_json)]
+        input_data = OPAService.diff_item_to_opa_input([d.model_dump() for d in diff_items])
+
+    if payload.policy_ids:
+        all_results = []
+        for policy_id in payload.policy_ids:
+            result = opa.evaluate_policy(policy_id, input_data, payload.rule)
+            all_results.append(result)
+    else:
+        all_results = opa.evaluate_all_policies(input_data, payload.rule)
+
+    results = [OPAEvaluationResult(**r) for r in all_results]
+
+    total_violations = sum(len(r.violations) for r in results)
+    compliant = total_violations == 0
+
+    AuditService.record_event(
+        db=db, actor=user.username, role=user.roles[0] if user.roles else "operator",
+        action="EVALUATE_OPA_POLICIES", resource_type="policy_evaluation",
+        resource_id=payload.snapshot_id or payload.diff_id or "unknown",
+        details={
+            "snapshot_id": payload.snapshot_id,
+            "diff_id": payload.diff_id,
+            "total_violations": total_violations,
+            "compliant": compliant,
+        },
+    )
+
+    return OPAEvaluationResponse(
+        snapshot_id=payload.snapshot_id,
+        diff_id=payload.diff_id,
+        results=results,
+        total_violations=total_violations,
+        compliant=compliant,
+    )
+
+
 @api_router.post("/webhooks/{provider}", response_model=WebhookIngestResponse)
 async def ingest_webhook(
     provider: str,

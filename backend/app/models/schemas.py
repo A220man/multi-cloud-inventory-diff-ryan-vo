@@ -215,3 +215,44 @@ class WebhookIngestResponse(BaseModel):
     assets_processed: int
     baseline_snapshot_id: Optional[str] = None
     changes_detected: bool
+class OPAPolicyCreate(BaseModel):
+    policy_id: str = Field(..., min_length=1, max_length=128, pattern=r"^[a-zA-Z0-9_-]+$")
+    rego_content: str = Field(..., min_length=1)
+    description: Optional[str] = None
+
+
+class OPAPolicyResponse(BaseModel):
+    policy_id: str
+    description: Optional[str] = None
+    loaded: bool
+
+
+class OPAPolicyListResponse(BaseModel):
+    policies: list[OPAPolicyResponse]
+
+
+class OPAEvaluationRequest(BaseModel):
+    snapshot_id: Optional[str] = None
+    diff_id: Optional[str] = None
+    policy_ids: Optional[list[str]] = None
+    rule: str = "violation"
+
+
+class OPAViolation(BaseModel):
+    policy_id: str
+    message: str
+
+
+class OPAEvaluationResult(BaseModel):
+    policy_id: str
+    violations: list[OPAViolation]
+    allowed: bool
+    error: Optional[str] = None
+
+
+class OPAEvaluationResponse(BaseModel):
+    snapshot_id: Optional[str] = None
+    diff_id: Optional[str] = None
+    results: list[OPAEvaluationResult]
+    total_violations: int
+    compliant: bool
