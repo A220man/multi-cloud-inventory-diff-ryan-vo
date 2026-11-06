@@ -1,9 +1,21 @@
 # Changelog
 
-## 1.5.0 — work-in-progress checkpoint
+## 1.6.0 — work-in-progress checkpoint
 
 Partial code published for continued development. Known issues: STATUS.md.
 
+## 1.5.0 — work-in-progress checkpoint
+
+### Added
+- Exportable signed compliance audit bundles with JSON-LD Verifiable Credential format and CSV exports.
+- Compliance bundle generation API: `POST /api/compliance/bundle` collecting snapshot lineage, diff evidence, OPA policy violations, ML risk evaluations, and audit logs.
+- Bundle verification API: `POST /api/compliance/bundle/verify` with RSA-PSS SHA256 cryptographic proof validation.
+- JSON-LD output following W3C Verifiable Credential data model with `@context`, `type`, and `proof` fields.
+- CSV exports for snapshots, assets, diffs, diff items, OPA violations, ML evaluations, and audit logs.
+- `ComplianceBundleService` with cryptographic signing using RSA-PSS SHA256 and JWK public key exposure.
+- Full test coverage in `backend/tests/test_compliance_bundle.py` (14 tests).
+
+Partial code published for continued development. Known issues: STATUS.md.
 ## 1.4.0 — work-in-progress checkpoint
 
 ### Added

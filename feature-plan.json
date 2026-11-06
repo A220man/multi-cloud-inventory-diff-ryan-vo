@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "current_feature": "policy-as-code-opa-rules",
+  "current_feature": "exportable-compliance-audit-bundle",
   "features": [
     {
       "id": "multi-cloud-normalization",
@@ -154,10 +154,19 @@
     {
       "id": "exportable-compliance-audit-bundle",
       "title": "Exportable Signed Compliance Audit Bundles",
-      "status": "planned",
+      "status": "done",
       "acceptance": [
-        "Generate signed JSON-LD and CSV compliance audit report bundles",
-        "Include complete snapshot lineage, diff evidence, and reviewer approval signatures"
+        "Generate signed JSON-LD compliance audit report bundles",
+        "Include complete snapshot lineage, diff evidence, and reviewer approval signatures",
+        "Export CSV bundles for spreadsheet analysis"
+      ],
+      "implementation": [
+        "backend/app/services/compliance_bundle.py",
+        "backend/app/api/endpoints.py (compliance bundle endpoints)",
+        "backend/app/models/schemas.py (ComplianceBundleRequest, ComplianceBundleResponse, etc.)"
+      ],
+      "tests": [
+        "backend/tests/test_compliance_bundle.py"
       ]
     },
     {

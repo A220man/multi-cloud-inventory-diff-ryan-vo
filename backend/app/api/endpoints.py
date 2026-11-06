@@ -16,6 +16,10 @@ from app.models.entities import AssetRecord, DiffRecord, EvaluationRecord, Snaps
 from app.models.schemas import (
     AuditLogEntry,
     CanonicalAsset,
+    ComplianceBundleRequest,
+    ComplianceBundleResponse,
+    ComplianceBundleVerifyRequest,
+    ComplianceBundleVerifyResponse,
     DemoTokenRequest,
     DemoTokenResponse,
     DiffItem,
@@ -569,6 +573,102 @@ def evaluate_opa_policies(
         results=results,
         total_violations=total_violations,
         compliant=compliant,
+    )
+# Compliance Audit Bundle Endpoints
+@api_router.post("/compliance/bundle", response_model=ComplianceBundleResponse)
+def generate_compliance_bundle(
+    payload: ComplianceBundleRequest,
+    db: Session = Depends(get_db),
+    user: AuthUser = Depends(require_role("operator")),
+):
+    """Generate a signed compliance audit bundle with JSON-LD and CSV exports.
+
+    Includes snapshot lineage, diff evidence, OPA violations, ML evaluations,
+    and audit logs. Returns both JSON-LD bundle and CSV exports for analysis.
+    """
+    if not payload.snapshot_ids and not payload.diff_ids:
+        raise HTTPException(status_code=400, detail="Must provide at least one snapshot_id or diff_id")
+
+    # Verify snapshots exist
+    for sid in payload.snapshot_ids:
+        snap = db.query(SnapshotRecord).filter(SnapshotRecord.id == sid).first()
+        if not snap:
+            raise HTTPException(status_code=404, detail=f"Snapshot {sid} not found")
+
+    # Verify diffs exist
+    for did in payload.diff_ids:
+        diff = db.query(DiffRecord).filter(DiffRecord.id == did).first()
+        if not diff:
+            raise HTTPException(status_code=404, detail=f"Diff {did} not found")
+
+    from app.services.compliance_bundle import create_compliance_bundle, ComplianceBundleService
+
+    private_key_pem = getattr(settings, "COMPLIANCE_BUNDLE_PRIVATE_KEY", None)
+    bundle = create_compliance_bundle(
+        db=db,
+        snapshot_ids=payload.snapshot_ids,
+        diff_ids=payload.diff_ids,
+        created_by=user.username,
+        description=payload.description or "",
+        signer_id=user.username,
+        signer_role=user.roles[0] if user.roles else "operator",
+        include_ml=payload.include_ml,
+        include_opa=payload.include_opa,
+        include_audit=payload.include_audit,
+        private_key_pem=private_key_pem,
+    )
+
+    bundle_id = bundle["metadata"]["bundle_id"]
+    created_at = bundle["metadata"]["created_at"]
+    signed = bundle["proof"].get("jws") != "unsigned-demo"
+
+    csv_exports = None
+    if payload.sign_bundle:
+        service = ComplianceBundleService(db, private_key_pem)
+        csv_exports = service.export_csv(bundle)
+
+    AuditService.record_event(
+        db=db, actor=user.username, role=user.roles[0] if user.roles else "operator",
+        action="GENERATE_COMPLIANCE_BUNDLE", resource_type="compliance_bundle", resource_id=bundle_id,
+        details={
+            "snapshot_count": len(payload.snapshot_ids),
+            "diff_count": len(payload.diff_ids),
+            "signed": signed,
+            "csv_exports": list(csv_exports.keys()) if csv_exports else [],
+        },
+    )
+
+    return ComplianceBundleResponse(
+        bundle=bundle,
+        csv_exports=csv_exports,
+        bundle_id=bundle_id,
+        created_at=created_at,
+        signed=signed,
+    )
+
+
+@api_router.post("/compliance/bundle/verify", response_model=ComplianceBundleVerifyResponse)
+def verify_compliance_bundle(
+    payload: ComplianceBundleVerifyRequest,
+    db: Session = Depends(get_db),
+    user: AuthUser = Depends(require_role("viewer")),
+):
+    """Verify the cryptographic signature of a compliance audit bundle."""
+    from app.services.compliance_bundle import ComplianceBundleService
+
+    service = ComplianceBundleService(db)
+    valid = service.verify_bundle(payload.bundle, payload.public_key_pem)
+
+    AuditService.record_event(
+        db=db, actor=user.username, role=user.roles[0] if user.roles else "viewer",
+        action="VERIFY_COMPLIANCE_BUNDLE", resource_type="compliance_bundle",
+        resource_id=payload.bundle.get("metadata", {}).get("bundle_id", "unknown"),
+        details={"valid": valid},
+    )
+
+    return ComplianceBundleVerifyResponse(
+        valid=valid,
+        verified_at=datetime.now(timezone.utc).isoformat(),
     )
 
 

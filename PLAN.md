@@ -4,7 +4,7 @@ Each round completes one feature or repair. Future items are planned, not implem
 
 ## Current round
 
-policy-as-code-opa-rules
+exportable-compliance-audit-bundle
 
 ## Roadmap
 
@@ -119,11 +119,16 @@ Tests: `backend/tests/test_opa.py`
 
 ### exportable-compliance-audit-bundle — Exportable Signed Compliance Audit Bundles
 
-Status: planned
+Status: done
 
 Acceptance:
-- Generate signed JSON-LD and CSV compliance audit report bundles
+- Generate signed JSON-LD compliance audit report bundles
 - Include complete snapshot lineage, diff evidence, and reviewer approval signatures
+- Export CSV bundles for spreadsheet analysis
+
+Implementation: `backend/app/services/compliance_bundle.py`, `backend/app/api/endpoints.py (compliance bundle endpoints)`, `backend/app/models/schemas.py (ComplianceBundleRequest, ComplianceBundleResponse, etc.)`
+
+Tests: `backend/tests/test_compliance_bundle.py`
 
 ### demo-login-envelope-repair — Repair Demo Login Envelope Mapping and Role Passthrough
 

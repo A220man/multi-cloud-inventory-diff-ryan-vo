@@ -256,3 +256,29 @@ class OPAEvaluationResponse(BaseModel):
     results: list[OPAEvaluationResult]
     total_violations: int
     compliant: bool
+class ComplianceBundleRequest(BaseModel):
+    snapshot_ids: list[str] = Field(default_factory=list, min_length=0)
+    diff_ids: list[str] = Field(default_factory=list, min_length=0)
+    description: Optional[str] = None
+    include_ml: bool = True
+    include_opa: bool = True
+    include_audit: bool = True
+    sign_bundle: bool = True
+
+
+class ComplianceBundleResponse(BaseModel):
+    bundle: dict[str, Any]
+    csv_exports: Optional[dict[str, str]] = None
+    bundle_id: str
+    created_at: str
+    signed: bool
+
+
+class ComplianceBundleVerifyRequest(BaseModel):
+    bundle: dict[str, Any]
+    public_key_pem: Optional[str] = None
+
+
+class ComplianceBundleVerifyResponse(BaseModel):
+    valid: bool
+    verified_at: str
