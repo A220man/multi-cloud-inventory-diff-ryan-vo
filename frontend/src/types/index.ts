@@ -111,3 +111,32 @@ export interface SnapshotCreateRequest {
   name: string; cloud_provider: CloudProvider; source_type: string;
   description?: string; assets?: CanonicalAsset[]; raw_payload?: Record<string, unknown>[];
 }
+
+// ─── Compliance Bundle ───────────────────────────────────────────────────────
+export interface ComplianceBundleRequest {
+  snapshot_ids: string[];
+  diff_ids: string[];
+  description?: string;
+  include_ml?: boolean;
+  include_opa?: boolean;
+  include_audit?: boolean;
+  sign_bundle?: boolean;
+}
+
+export interface ComplianceBundleResponse {
+  bundle: Record<string, unknown>;
+  csv_exports: Record<string, string> | null;
+  bundle_id: string;
+  created_at: string;
+  signed: boolean;
+}
+
+export interface ComplianceBundleVerifyRequest {
+  bundle: Record<string, unknown>;
+  public_key_pem?: string;
+}
+
+export interface ComplianceBundleVerifyResponse {
+  valid: boolean;
+  verified_at: string;
+}

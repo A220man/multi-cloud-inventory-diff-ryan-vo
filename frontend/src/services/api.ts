@@ -6,6 +6,8 @@ import type {
   SnapshotSummary, SnapshotDetail, SnapshotCreateRequest, DiffResponse,
   DiffSummary, MLEvaluationResponse, MLBenchmarkResult, LLMAdvisoryResponse,
   AuditLogEntry, SeedResponse, AuthState, DemoLoginRequest, LLMProvider, UserRole,
+  ComplianceBundleRequest, ComplianceBundleResponse, ComplianceBundleVerifyRequest,
+  ComplianceBundleVerifyResponse,
 } from '../types';
 
 const BASE = '/api';
@@ -142,6 +144,20 @@ export async function listAuditLogs(
     ...(resourceType ? { resourceType } : {}),
   });
   return request<AuditLogEntry[]>(`/audit?${params.toString()}`, { method: 'GET' }, token);
+}
+// ─── Compliance Bundle ─────────────────────────────────────────────────────────
+export async function generateComplianceBundle(
+  payload: ComplianceBundleRequest,
+  token: string
+): Promise<ComplianceBundleResponse> {
+  return request<ComplianceBundleResponse>('/compliance/bundle', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }, token);
+}
+
+export async function verifyComplianceBundle(
+  payload: ComplianceBundleVerifyRequest,
+  token: string
+): Promise<ComplianceBundleVerifyResponse> {
+  return request<ComplianceBundleVerifyResponse>('/compliance/bundle/verify', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }, token);
 }
 
 export { ApiError };
