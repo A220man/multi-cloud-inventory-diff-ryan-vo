@@ -9,8 +9,8 @@ import {
   ScrollText,
   LogOut,
   Cloud,
+  Shield,
 } from 'lucide-react';
-
 interface NavItem {
   id: PageId;
   label: string;
@@ -24,6 +24,7 @@ const NAV_ITEMS: NavItem[] = [
   { id: 'diff', label: 'Diff Inspector', icon: <GitCompareArrows size={16} /> },
   { id: 'ml', label: 'ML Evaluation', icon: <BrainCircuit size={16} /> },
   { id: 'audit', label: 'Audit Log', icon: <ScrollText size={16} />, minRole: 'operator' },
+  { id: 'compliance', label: 'Compliance', icon: <Shield size={16} />, minRole: 'operator' },
 ];
 
 interface LayoutProps {

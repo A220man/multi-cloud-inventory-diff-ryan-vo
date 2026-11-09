@@ -264,7 +264,7 @@ class ComplianceBundleRequest(BaseModel):
     include_opa: bool = True
     include_audit: bool = True
     sign_bundle: bool = True
-
+    include_csv: bool = True
 
 class ComplianceBundleResponse(BaseModel):
     bundle: dict[str, Any]

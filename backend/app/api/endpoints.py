@@ -623,6 +623,15 @@ def generate_compliance_bundle(
     signed = bundle["proof"].get("jws") != "unsigned-demo"
 
     csv_exports = None
+    if payload.include_csv:
+        service = ComplianceBundleService(db, private_key_pem)
+        csv_exports = service.export_csv(bundle)
+
+    bundle_id = bundle["metadata"]["bundle_id"]
+    created_at = bundle["metadata"]["created_at"]
+    signed = bundle["proof"].get("jws") != "unsigned-demo"
+
+    csv_exports = None
     if payload.sign_bundle:
         service = ComplianceBundleService(db, private_key_pem)
         csv_exports = service.export_csv(bundle)

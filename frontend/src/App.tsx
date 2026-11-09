@@ -7,8 +7,9 @@ import SnapshotsPage from './components/SnapshotsPage';
 import DiffPage from './components/DiffPage';
 import MLPage from './components/MLPage';
 import AuditPage from './components/AuditPage';
+import ComplianceBundlePage from './components/ComplianceBundlePage';
 
-export type PageId = 'dashboard' | 'snapshots' | 'diff' | 'ml' | 'audit';
+export type PageId = 'dashboard' | 'snapshots' | 'diff' | 'ml' | 'audit' | 'compliance';
 
 function AppInner() {
   const { isAuthenticated } = useAuth();
@@ -44,6 +45,7 @@ function AppInner() {
         <MLPage selectedDiffId={selectedDiffId} />
       )}
       {page === 'audit' && <AuditPage />}
+      {page === 'compliance' && <ComplianceBundlePage />}
     </Layout>
   );
 }
