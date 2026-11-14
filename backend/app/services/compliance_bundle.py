@@ -340,6 +340,8 @@ class ComplianceBundleService:
         audit_logs = []
         if include_audit:
             audit_logs = self._collect_audit_logs(snapshot_ids, diff_ids)
+        # TODO: include reviewer approvals (placeholder)
+        reviewer_approvals = []
 
         bundle = {
             "@context": [
@@ -352,6 +354,7 @@ class ComplianceBundleService:
             "snapshots": snapshots,
             "diffs": diffs,
             "opa_violations": opa_violations,
+            "reviewer_approvals": reviewer_approvals,
             "ml_evaluations": ml_evaluations,
             "audit_logs": audit_logs,
             "proof": {},  # Will be filled by sign_bundle
