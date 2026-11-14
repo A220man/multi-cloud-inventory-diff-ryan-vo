@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "multi-cloud-inventory-diff-ryan-vo"
-version = "1.0.0"
+version = "1.8.0"
 description = "Multi-cloud asset inventory normalization, deterministic configuration drift detection, and ML-driven exposure risk classification."
 readme = "README.md"
 requires-python = ">=3.12"
