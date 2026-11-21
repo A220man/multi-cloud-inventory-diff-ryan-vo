@@ -437,3 +437,41 @@ def test_compliance_bundle_request_validation():
     req = ComplianceBundleRequest(snapshot_ids=[], diff_ids=[])
     assert req.snapshot_ids == []
     assert req.diff_ids == []
+
+def test_generate_bundle_without_ml_evaluations(mock_db, sample_snapshot, sample_diff, sample_evaluation, sample_audit_log):
+    """Test generating a compliance bundle without ML evaluations."""
+    # Setup mock queries - return snapshot for snapshot queries, diff for diff queries
+    def query_side_effect(model):
+        from app.models.entities import SnapshotRecord, DiffRecord, EvaluationRecord, AuditLogRecord
+        mock_query = MagicMock()
+        if model == SnapshotRecord:
+            mock_query.filter.return_value.first.return_value = sample_snapshot
+        elif model == DiffRecord:
+            mock_query.filter.return_value.first.return_value = sample_diff
+        elif model == EvaluationRecord:
+            mock_query.filter.return_value.order_by.return_value.all.return_value = [sample_evaluation]
+        elif model == AuditLogRecord:
+            mock_query.filter.return_value.order_by.return_value.limit.return_value.all.return_value = [sample_audit_log]
+        return mock_query
+
+    mock_db.query.side_effect = query_side_effect
+
+    from unittest.mock import patch
+    from app.services.compliance_bundle import ComplianceBundleService
+    with patch("app.services.compliance_bundle.Session", return_value=mock_db):
+        service = ComplianceBundleService(mock_db)
+    bundle = service.generate_bundle(
+        snapshot_ids=[sample_snapshot.id],
+        diff_ids=[sample_diff.id],
+        created_by='test-user',
+        include_ml=False,
+        include_opa=True,
+        include_audit=True,
+    )
+    # Verify ML evaluations are not included
+    assert 'ml_evaluations' not in bundle or bundle['ml_evaluations'] == []
+    # Verify other sections are still included
+    assert 'snapshots' in bundle
+    assert 'diffs' in bundle
+    assert 'opa_violations' in bundle
+    assert 'audit_logs' in bundle
