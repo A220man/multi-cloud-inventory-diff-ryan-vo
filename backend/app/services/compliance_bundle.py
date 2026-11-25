@@ -341,7 +341,7 @@ class ComplianceBundleService:
         if include_audit:
             audit_logs = self._collect_audit_logs(snapshot_ids, diff_ids)
         # TODO: include reviewer approvals (placeholder)
-        reviewer_approvals = []
+        reviewer_approvals = self._collect_reviewer_approvals(audit_logs)
 
         bundle = {
             "@context": [
@@ -361,6 +361,23 @@ class ComplianceBundleService:
         }
 
         return bundle
+    def _collect_reviewer_approvals(self, audit_logs: list[dict]) -> list[dict]:
+        """Collect reviewer approval audit events and map to ReviewerApproval dicts."""
+        approvals = []
+        for log in audit_logs:
+            action = log.get("action", "")
+            # Filter for approval/review-related actions
+            if any(kw in action.lower() for kw in ["approve", "review", "sign", "endorse"]):
+                approval = {
+                    "reviewer_id": log.get("actor", ""),
+                    "reviewer_role": log.get("role", ""),
+                    "approved_at": log.get("created_at", ""),
+                    "approval_type": action,
+                    "resource_id": log.get("resource_id", ""),
+                    "signature": "",  # Signature would be captured separately in production
+                }
+                approvals.append(approval)
+        return approvals
 
     def sign_bundle(self, bundle: dict[str, Any], signer_id: str, signer_role: str) -> dict[str, Any]:
         """Sign the compliance bundle with cryptographic proof."""
